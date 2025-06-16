@@ -1,0 +1,16 @@
+const toolsEnhance = [
+{ name: 'Auto Enhance', icon: 'image-auto-adjust', lib: MCIcon, endpoint_filter_type: 'auto_enhance' },
+{ name: 'Sharpen', icon: 'palette-swatch-outline', lib: MCIcon, endpoint_filter_type: 'sharpen' },
+{ name: 'AI Upscale', icon: 'magnify-scan', lib: MCIcon, endpoint_filter_type: 'ai_upscale' },
+{ name: 'Brightness', icon: 'brightness-6', lib: MCIcon, endpoint_filter_type: 'brightness_adjust' },
+{ name: 'Blur BG', icon: 'blur', lib: MCIcon, endpoint_filter_type: 'blur_background' },
+{ name: 'Retouch', icon: 'face-man-shimmer', lib: MCIcon, endpoint_filter_type: 'face_retouch' },
+];
+const toolsFilter = [
+{ name: 'Ghibli Sketch', icon: 'brush', lib: MCIcon, endpoint_filter_type: 'grayscale' },
+{ name: 'Cartoon', icon: 'emoticon', lib: MCIcon, endpoint_filter_type: 'cartoon' },
+{ name: 'Oil Painting', icon: 'palette', lib: MCIcon, endpoint_filter_type: 'oil_paint' },
+{ name: 'Watercolor', icon: 'water', lib: MCIcon, endpoint_filter_type: 'watercolor' },
+{ name: 'Pencil Sketch', icon: 'lead-pencil', lib: MCIcon, endpoint_filter_type: 'pencil_sketch' },
+{ name: 'Pop Art', icon: 'popcorn', lib: MCIcon, endpoint_filter_type: 'pop_art' },
+];
