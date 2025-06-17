@@ -7,7 +7,7 @@ async def process(image: UploadFile):
     contents = await image.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    edges = cv2.Canny(img, 100, 200)
-    _, buffer = cv2.imencode('.jpg', edges)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, buffer = cv2.imencode('.jpg', gray)
     encoded = base64.b64encode(buffer).decode("utf-8")
     return encoded
