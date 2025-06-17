@@ -1,12 +1,18 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from mangum import Mangum
+from flask import Flask, jsonify, request
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/")
-async def read_root():
-    return {"message": "Hello from FastAPI on Vercel!"}
+@app.route("/", methods=["GET"])
+def hello():
+    return jsonify({"message": "Hello from Flask on Vercel!"})
 
-# Wrap the app in Mangum for AWS Lambda compatibility
-handler = Mangum(app)
+# Vercel will call this handler
+def handler(event, context):
+    from werkzeug.middleware.dispatcher import DispatcherMiddleware
+    from werkzeug.wrappers import Request, Response
+
+    def simple_app(environ, start_response):
+        return Response("Not Found", status=404)(environ, start_response)
+
+    app_full = DispatcherMiddleware(simple_app, {"/": app})
+    return app_full(environ=event["environ"], start_response=event["start_response"])
