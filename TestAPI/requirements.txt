@@ -3,3 +3,4 @@ uvicorn
 opencv-python-headless
 python-multipart
 numpy
+onnxruntime
