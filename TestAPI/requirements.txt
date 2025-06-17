@@ -1,2 +1,3 @@
 flask
 werkzeug
+opencv-python-headless
