@@ -1,21 +1,26 @@
 // components/Header.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet ,  Alert} from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
+
 const Header = () => {
+  const handleProPress = () => {
+    Alert.alert('Pro Active', 'Pro version is activated for new users!');
+  };
+
 
   return (
     <View style={styles.headerContainer}>
-      <Text style={styles.appName}>EnhanceAI</Text>
+      <Text style={styles.appName}>Sharpify</Text>
       <View style={styles.headerIcons}>
-        <TouchableOpacity style={styles.proButton}>
+        <TouchableOpacity style={styles.proButton} onPress={handleProPress}>
           <Text style={styles.proButtonText} >PRO</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconButton}>
           <Ionicon name="settings-outline" size={26} color="white" />
         </TouchableOpacity>
-      </View>
+      </View>t
     </View>
   );
 };

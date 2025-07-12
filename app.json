@@ -1,35 +1,42 @@
 {
   "expo": {
-    "name": "EnhanceAI",
-    "slug": "EnhanceAI",
-    "version": "1.0.0",
+    "name": "Sharpify",
+    "slug": "Sharpify",
+    "version": "1.1.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "backgroundColor": "#ffffff"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.raahim2.EnhanceAI"
+      "package": "com.raahim2.Sharpify",
+      "androidStatusBar": {
+        "barStyle": "dark-content",
+        "backgroundColor": "#ffffff",
+        "translucent": false
+      }
     },
     "web": {
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/logo.png"
     },
     "extra": {
       "eas": {
-        "projectId": "6af4bc07-bcbf-4688-b3c1-f737ccb7e2ef"
+        "projectId": "54f832af-ee54-44ec-95d3-81c77b3e83b2"
       }
-    }
+    },
+    "owner": "crocodilo"
   }
 }

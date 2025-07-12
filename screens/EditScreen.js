@@ -1,19 +1,21 @@
-// EnhanceScreen.js (or EditScreen.js)
-import React, { useState, useRef, useEffect, useCallback } from 'react'; // Added useCallback
+// EnhanceScreen.js
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   Animated,
   StatusBar,
   ActivityIndicator,
   Alert,
-  Image // Ensure this is from 'react-native'
+  Image,
+  Text
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { State } from 'react-native-gesture-handler';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import {
   IMAGE_VIEW_MAX_HEIGHT,
@@ -25,6 +27,12 @@ import EditScreenHeader from '../components/EditScreen/header';
 import ImageProcessingOverlay from '../components/EditScreen/ImageProcessingOverlay';
 import ImageComparisonView from '../components/EditScreen/ImageComparisonView';
 import ToolsTray from '../components/EditScreen/ToolsTray';
+
+// --- NEW: Define compression strategy constants for easy tuning ---
+const NO_COMPRESSION_THRESHOLD_MB = 1.5;
+const HEAVY_COMPRESSION_THRESHOLD_MB = 6.5;
+const MODERATE_COMPRESSION_QUALITY = 0.6; // For images between 1.5MB and 8MB
+const HEAVY_COMPRESSION_QUALITY = 0.3;    // For images > 8MB
 
 const blobToDataUri = (blob) => {
   return new Promise((resolve, reject) => {
@@ -57,23 +65,32 @@ const EditScreen = ({ route, navigation }) => {
   const transX = useRef(new Animated.Value(SCREEN_WIDTH / 2)).current;
 
   const toolsFilter = [
-    { name: 'Grayscale', icon: 'palette-swatch-outline', lib: MCIcon, endpoint_filter_type: 'grayscale' },
-    { name: 'Canny Edge', icon: 'image-search-outline', lib: MCIcon, endpoint_filter_type: 'canny' },
-    { name: 'Invert', icon: 'invert-colors', lib: MCIcon, endpoint_filter_type: 'invert' },
-    { name: 'Comic', icon: 'tooltip-image', lib: MCIcon, endpoint_filter_type: 'comic' },
-    { name: 'Sketch', icon: 'lead-pencil', lib: MCIcon, endpoint_filter_type: 'sketch' },
+    { name: 'Edge Sketch', icon: 'image-search-outline', lib: MCIcon, endpoint_filter_type: 'canny' },
+    { name: 'ASCII Art', icon: 'code-tags', lib: MCIcon, endpoint_filter_type: 'ascii_art' },
+    { name: 'Comic', icon: 'emoticon-outline', lib: MCIcon, endpoint_filter_type: 'comic' },
+    { name: 'Sketch', icon: 'pencil-outline', lib: MCIcon, endpoint_filter_type: 'sketch' },
+    { name: 'Color Sketch', icon: 'brush-variant', lib: MCIcon, endpoint_filter_type: 'color_sketch' },
+    { name: 'Cartoon', icon: 'emoticon-happy-outline', lib: MCIcon, endpoint_filter_type: 'cartoon' },
+    { name: 'Water Color', icon: 'water-outline', lib: MCIcon, endpoint_filter_type: 'water_color' },
+    { name: 'Heat Map', icon: 'thermometer', lib: MCIcon, endpoint_filter_type: 'heat' },
+    { name: 'X-Ray', icon: 'ray-start-end', lib: MCIcon, endpoint_filter_type: 'xray' },
+    { name: 'Invert Colors', icon: 'invert-colors', lib: MCIcon, endpoint_filter_type: 'invert' },
+    { name: 'Frost', icon: 'snowflake', lib: MCIcon, endpoint_filter_type: 'frost' },
+    { name: 'Grayscale', icon: 'contrast-box', lib: MCIcon, endpoint_filter_type: 'grayscale' },
     { name: 'Pixelate', icon: 'grid', lib: MCIcon, endpoint_filter_type: 'pixelate' },
-    { name: 'Cartoon', icon: 'emoticon-cool-outline', lib: MCIcon, endpoint_filter_type: 'cartoon' },
-    { name: 'Original', icon: 'image-refresh-outline', lib: MCIcon, endpoint_filter_type: 'original'},
+    { name: 'Oil Paint', icon: 'palette-outline', lib: MCIcon, endpoint_filter_type: 'oil_paint' },
+    { name: 'Kaleidoscop', icon: 'shape-polygon-plus', lib: MCIcon, endpoint_filter_type: 'kalaidoscope' },
   ];
 
   const toolsEnhance = [
+    { name: 'Upscale', icon: 'auto-fix', lib: MCIcon, endpoint_filter_type: 'auto_enhance' },
     { name: 'Enhance', icon: 'image-auto-adjust', lib: MCIcon, endpoint_filter_type: 'sharpen' },
-    { name: 'Clearify', icon: 'image-filter-center-focus', lib: MCIcon, endpoint_filter_type: 'denoise' },
+    { name: 'Reduce Noise', icon: 'water-off-outline', lib: MCIcon, endpoint_filter_type: 'denoise' },
     { name: 'Auto Brightness', icon: 'brightness-auto', lib: MCIcon, endpoint_filter_type: 'auto_brightness' },
-    { name: 'Enlighten', icon: 'weather-sunny-alert', lib: MCIcon, endpoint_filter_type: 'enlighten' },
+    { name: 'Remove Shadows', icon: 'brightness-4', lib: MCIcon, endpoint_filter_type: 'shadow_removal' },
+    { name: 'Adjust Contrast', icon: 'contrast', lib: MCIcon, endpoint_filter_type: 'contrast_adjust' },
     { name: 'Remove Background', icon: 'image-remove', lib: MCIcon, endpoint_filter_type: 'bgrem' },
-    { name: 'Blur Background', icon: 'blur', lib: MCIcon, endpoint_filter_type: 'bgblur' },
+    { name: 'Enhance Edges', icon: 'vector-line', lib: MCIcon, endpoint_filter_type: 'edge_enhance' },
   ];
 
   useEffect(() => {
@@ -84,11 +101,11 @@ const EditScreen = ({ route, navigation }) => {
       setCurrentTools(toolsFilter);
       setHeaderTitle('Apply Filter');
     }
-    setProcessedImageUri(null); // Clear processed image when mode changes
-    if (displaySize.width > 0) { // Reset slider when mode changes
+    setProcessedImageUri(null);
+    if (displaySize.width > 0) {
         transX.setValue(displaySize.width / 2);
     }
-  }, [currentMode, displaySize.width, transX]); // Added transX to dependency
+  }, [currentMode, displaySize.width, transX]);
 
 
   useEffect(() => {
@@ -120,7 +137,6 @@ const EditScreen = ({ route, navigation }) => {
         (error) => {
           console.error("Image.getSize error: ", error);
           Alert.alert("Error", "Could not load image details. " + error.message);
-          // Set some default display size to avoid UI breaking
           const defaultWidth = SCREEN_WIDTH;
           const defaultHeight = IMAGE_VIEW_MAX_HEIGHT * 0.8;
           setDisplaySize({ width: defaultWidth, height: defaultHeight });
@@ -129,8 +145,14 @@ const EditScreen = ({ route, navigation }) => {
           setIsLoadingImageSize(false);
         }
       );
+    } else {
+        setIsLoadingImageSize(false);
+        const defaultWidth = SCREEN_WIDTH;
+        const defaultHeight = IMAGE_VIEW_MAX_HEIGHT * 0.8;
+        setDisplaySize({ width: defaultWidth, height: defaultHeight }); 
+        transX.setValue(defaultWidth / 2);
     }
-  }, [currentImageUri, transX]); // Added transX to dependency
+  }, [currentImageUri, transX]);
 
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationX: dragX } }],
@@ -159,7 +181,7 @@ const EditScreen = ({ route, navigation }) => {
         return;
     }
     if (filterType === 'original') {
-      setProcessedImageUri(null); 
+      setProcessedImageUri(null);
       if (displaySize.width > 0) {
         transX.setValue(displaySize.width / 2);
       }
@@ -167,36 +189,62 @@ const EditScreen = ({ route, navigation }) => {
     }
 
     setIsProcessing(true);
-    // setProcessedImageUri(null); // Clearing here might cause a flicker before new image loads
-
     try {
-      const formData = new FormData();
-      const filename = currentImageUri.split('/').pop();
-      let fileType = 'image/jpeg';
-      const extensionMatch = filename.match(/\.([^.]+)$/);
-      const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'jpg';
+      // --- START: ADAPTIVE COMPRESSION LOGIC ---
+      let uriToUpload = currentImageUri;
+      let compressionQuality = null;
 
-      if (extension === 'png') {
-        fileType = 'image/png';
-      } else if (extension === 'jpg' || extension === 'jpeg') {
-        fileType = 'image/jpeg';
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(currentImageUri);
+        if (fileInfo.exists && fileInfo.size) {
+            const sizeInMB = fileInfo.size / (1024 * 1024);
+            
+            if (sizeInMB > HEAVY_COMPRESSION_THRESHOLD_MB) {
+                compressionQuality = HEAVY_COMPRESSION_QUALITY;
+                console.log(`Image is large (${sizeInMB.toFixed(2)}MB). Applying heavy compression.`);
+            } else if (sizeInMB > NO_COMPRESSION_THRESHOLD_MB) {
+                compressionQuality = MODERATE_COMPRESSION_QUALITY;
+                console.log(`Image is medium (${sizeInMB.toFixed(2)}MB). Applying moderate compression.`);
+            } else {
+                console.log(`Image is small (${sizeInMB.toFixed(2)}MB). No compression needed.`);
+            }
+        }
+      } catch (e) {
+        console.warn("Could not get file info, skipping smart compression.", e);
       }
+
+      if (compressionQuality !== null) {
+        const compressedImage = await ImageManipulator.manipulateAsync(
+          currentImageUri,
+          [],
+          { 
+            compress: compressionQuality,
+            format: ImageManipulator.SaveFormat.PNG,
+          }
+        );
+        uriToUpload = compressedImage.uri;
+      }
+      // --- END: ADAPTIVE COMPRESSION LOGIC ---
+      
+      const formData = new FormData();
+      const filename = uriToUpload.split('/').pop();
+      const fileType = 'image/jpeg';
       
       formData.append('file', {
-        uri: currentImageUri,
+        uri: uriToUpload,
         name: filename,
         type: fileType,
       });
       
       const endpoint = `${API_BASE_URL.replace(/\/$/, '')}/api/${filterType}`;
-      console.log(`Applying filter: ${filterType} to endpoint: ${endpoint} for image: ${currentImageUri}`);
 
       const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-
-      console.log(`Response status: ${response.status}`);
 
       if (!response.ok) {
         let errorDetail = `HTTP error! status: ${response.status}`;
@@ -214,13 +262,11 @@ const EditScreen = ({ route, navigation }) => {
         } catch (e) {
             const textError = await response.text();
             errorDetail = textError || errorDetail;
-            console.error("Non-JSON error response text:", textError);
         }
         throw new Error(errorDetail);
       }
 
       const imageBlob = await response.blob();
-      console.log(`Received blob: type=${imageBlob.type}, size=${imageBlob.size}`);
 
       if (imageBlob.size === 0) {
         throw new Error('Received empty image data from server.');
@@ -229,33 +275,17 @@ const EditScreen = ({ route, navigation }) => {
       const dataUri = await blobToDataUri(imageBlob);
       setProcessedImageUri(dataUri);
 
-      if (displaySize.width > 0) { // Reset slider after processing
+      if (displaySize.width > 0) {
          transX.setValue(displaySize.width / 2);
       }
 
     } catch (error) {
       console.error('Error applying filter:', error);
       Alert.alert('Processing Error', error.message || 'Could not apply the selected filter.');
-      setProcessedImageUri(null); // Clear on error
     } finally {
       setIsProcessing(false);
     }
-  }, [currentImageUri, displaySize.width, transX]); // Added dependencies for useCallback
-
-
-  // useEffect to automatically apply 'sharpen' when in 'enhance' mode and no filter is active
-  useEffect(() => {
-    if (
-      currentMode === 'enhance' &&
-      currentImageUri &&
-      !isLoadingImageSize &&   // Ensure image dimensions are loaded and displaySize is set
-      processedImageUri === null && // Only if no filter is currently applied or 'Original' was selected
-      !isProcessing            // Only if not already processing another filter
-    ) {
-      console.log("Auto-applying sharpen filter");
-      applyFilter('sharpen');
-    }
-  }, [currentMode, currentImageUri, isLoadingImageSize, processedImageUri, isProcessing, applyFilter]);
+  }, [currentImageUri, displaySize.width, transX]);
 
 
   const handleDownload = async () => {
@@ -280,7 +310,6 @@ const EditScreen = ({ route, navigation }) => {
       }
     } catch (permError) {
         Alert.alert('Permission Error', 'Could not request storage permission.');
-        console.error('Permission request error:', permError);
         return;
     }
 
@@ -302,19 +331,14 @@ const EditScreen = ({ route, navigation }) => {
           encoding: FileSystem.EncodingType.Base64,
         });
         temporaryFileCreated = true;
-      } else if (!imageToDownload.startsWith('file://')) {
-        // If it's a remote URI or other non-local file URI, you might need to download it first
-        // For simplicity, assuming local file URIs or data URIs are handled.
-        // If currentImageUri can be a remote http/https URI, you'd download it with FileSystem.downloadAsync
-        Alert.alert("Download Note", "Attempting to save a non-data URI directly. This might only work for local file URIs.");
       }
       
       const asset = await MediaLibrary.createAssetAsync(fileUriToSave);
       
-      const albumName = "YourAppEdits"; // Changed album name
+      const albumName = "Sharpify"; 
       let album = await MediaLibrary.getAlbumAsync(albumName);
       if (album === null) {
-        album = await MediaLibrary.createAlbumAsync(albumName, asset, false); // Store the returned album
+        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
       } else {
         await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
       }
@@ -338,10 +362,10 @@ const EditScreen = ({ route, navigation }) => {
 
   if (isLoadingImageSize && currentImageUri) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
          <StatusBar barStyle="light-content" backgroundColor="#121212" />
         <EditScreenHeader 
-            title={headerTitle || "Loading..."}
+            title={headerTitle || (currentMode === 'enhance' ? 'Enhance Image' : 'Apply Filter')}
             onGoBack={() => navigation.goBack()} 
             onDownload={handleDownload} 
         />
@@ -353,7 +377,7 @@ const EditScreen = ({ route, navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} >
       <StatusBar barStyle="light-content" backgroundColor="#121212" />
       <EditScreenHeader 
         title={headerTitle}
@@ -363,17 +387,38 @@ const EditScreen = ({ route, navigation }) => {
 
       <View style={styles.imageArea}>
         <ImageProcessingOverlay isVisible={isProcessing} />
-        <ImageComparisonView
-          originalImageUri={currentImageUri}
-          processedImageUri={processedImageUri}
-          displaySize={displaySize}
-          clampedSliderX={clampedSliderX}
-          onGestureEvent={onGestureEvent}
-          onHandlerStateChange={onHandlerStateChange}
-        />
+        {processedImageUri ? (
+          <ImageComparisonView
+            originalImageUri={currentImageUri}
+            processedImageUri={processedImageUri}
+            displaySize={displaySize}
+            clampedSliderX={clampedSliderX}
+            onGestureEvent={onGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+          />
+        ) : (
+          currentImageUri && displaySize.width > 0 && displaySize.height > 0 ? (
+            <View style={styles.singleImageContainer}>
+              <Image
+                source={{ uri: currentImageUri }}
+                style={{ width: displaySize.width, height: displaySize.height }}
+                resizeMode="contain"
+              />
+              {currentTools.length > 0 && (
+                <Text style={styles.instructionText}>
+                  Select a filter from below
+                </Text>
+              )}
+            </View>
+          ) : (
+             <View style={styles.placeholderContainer}>
+                {!currentImageUri && !isLoadingImageSize && <MCIcon name="image-off-outline" size={60} color="#888" />}
+             </View>
+          )
+        )}
       </View>
 
-      {currentTools.length > 0 && (
+      {currentTools.length > 0 && displaySize.width > 0 && (
         <ToolsTray
           tools={currentTools}
           onToolPress={applyFilter}
@@ -389,18 +434,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1C1C1E',
   },
-  loadingContainer: { 
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E', 
+    backgroundColor: '#1C1C1E',
   },
-  imageArea: { 
+  placeholderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10, 
-    position: 'relative', 
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1C1C1E',
+  },
+  imageArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    position: 'relative',
+    backgroundColor: '#1C1C1E',
+  },
+  singleImageContainer: { 
+    justifyContent: 'center',
+    alignItems: 'center', 
+  },
+  instructionText: { 
+    marginTop: 15, 
+    color: '#B0B0B0', 
+    fontSize: 16,
+    textAlign: 'center',
+    paddingHorizontal: 20, 
   },
 });
 

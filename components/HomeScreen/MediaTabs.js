@@ -1,9 +1,9 @@
 // components/MediaTabs.js
-import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 
-const MediaTabs = ({ selectedTab, onTabChange }) => {
+
+const MediaTabs = ({ selectedTab, onTabChange , handelTokenPress }) => {
   return (
     <View style={styles.tabsContainer}>
       <View style={styles.tabButtonsContainer}>
@@ -18,8 +18,8 @@ const MediaTabs = ({ selectedTab, onTabChange }) => {
           <Text style={[styles.tabButtonText, selectedTab === 'Videos' && styles.activeTabButtonText]}>Videos</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.galleryIconButton}>
-        <Icon name="image-multiple-outline" size={24} color="white" />
+      <TouchableOpacity style={styles.galleryIconButton} onPress={handelTokenPress}>
+        <Ionicon name="wallet" size={26} color="white" style={styles.galleryIconButton} />
       </TouchableOpacity>
     </View>
   );

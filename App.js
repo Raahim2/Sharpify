@@ -1,28 +1,36 @@
 // App.js
-import 'react-native-gesture-handler'; // THIS MUST BE THE FIRST IMPORT
-import React from 'react';
+import 'react-native-gesture-handler';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; // IMPORT THIS
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import HomeScreen from './screens/HomeScreen';
 import EditScreen from './screens/EditScreen';
-import ImageGenScreen from './screens/ImageGenScreen';
+import TokenScreen from './screens/TokenScreen';
+import FeatureTestScreen from './screens/FeatureTestScreen';
+import RecolorScreen from './screens/RecolorScreen'; 
+
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="ImageGen" component={ImageGenScreen} />
-          <Stack.Screen name="Edit" component={EditScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <View style={{ flex: 1 }}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Token" component={TokenScreen} />
+            <Stack.Screen name="FeatureTest" component={FeatureTestScreen} />
+            <Stack.Screen name="Edit" component={EditScreen} />
+            <Stack.Screen name="Recolor" component={RecolorScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </View>
     </GestureHandlerRootView>
   );
 };

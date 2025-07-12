@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onAiPhotoPress }) => {
+const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onRecolorPress }) => {
   return (
     <View style={styles.bottomNavContainer}>
       <TouchableOpacity style={styles.bottomNavItem} onPress={onEnhancePress}>
@@ -14,9 +14,9 @@ const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onAiPhotoPress }) 
         <Icon name="image-auto-adjust" size={28} color="#FFF" />
         <Text style={styles.bottomNavText}>AI Filters</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.bottomNavItem} onPress={onAiPhotoPress}>
-        <Icon name="robot" size={28} color="#FFF" />
-        <Text style={styles.bottomNavText}>AI Photo</Text>
+      <TouchableOpacity style={styles.bottomNavItem} onPress={onRecolorPress}>
+        <Icon name="format-color-fill" size={28} color="#FFF" />
+        <Text style={styles.bottomNavText}>AI Recolor</Text>
       </TouchableOpacity>
     </View>
   );
