@@ -1,5 +1,5 @@
 // EnhanceScreen.js
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'; // NEW: Import useMemo
 import {
   View,
   StyleSheet,
@@ -8,7 +8,10 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Text
+  Text,
+  Modal,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { State } from 'react-native-gesture-handler';
@@ -16,6 +19,9 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
+
+import ImageZoom from 'react-native-image-pan-zoom';
+import IoniconsIcon from 'react-native-vector-icons/Ionicons';
 
 import {
   IMAGE_VIEW_MAX_HEIGHT,
@@ -28,11 +34,13 @@ import ImageProcessingOverlay from '../components/EditScreen/ImageProcessingOver
 import ImageComparisonView from '../components/EditScreen/ImageComparisonView';
 import ToolsTray from '../components/EditScreen/ToolsTray';
 
-// --- NEW: Define compression strategy constants for easy tuning ---
 const NO_COMPRESSION_THRESHOLD_MB = 1.5;
 const HEAVY_COMPRESSION_THRESHOLD_MB = 6.5;
-const MODERATE_COMPRESSION_QUALITY = 0.6; // For images between 1.5MB and 8MB
-const HEAVY_COMPRESSION_QUALITY = 0.3;    // For images > 8MB
+const MODERATE_COMPRESSION_QUALITY = 0.6;
+const HEAVY_COMPRESSION_QUALITY = 0.3;
+
+const imageCache = new Map();
+const CACHE_MAX_SIZE = 20;
 
 const blobToDataUri = (blob) => {
   return new Promise((resolve, reject) => {
@@ -59,10 +67,37 @@ const EditScreen = ({ route, navigation }) => {
   const [currentMode, setCurrentMode] = useState(initialMode);
   const [currentTools, setCurrentTools] = useState([]);
   const [headerTitle, setHeaderTitle] = useState('');
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const sliderInitialXPos = useRef(null);
   const dragX = useRef(new Animated.Value(0)).current;
   const transX = useRef(new Animated.Value(SCREEN_WIDTH / 2)).current;
+
+  // --- NEW: Calculate "contain" dimensions for the fullscreen modal ---
+  const modalImageDisplaySize = useMemo(() => {
+    if (!imageSize.width || !imageSize.height) {
+      return { width: 0, height: 0 };
+    }
+    const screen = Dimensions.get('window');
+    const imageAspectRatio = imageSize.width / imageSize.height;
+    const screenAspectRatio = screen.width / screen.height;
+
+    // If image is wider than the screen aspect ratio, fit to screen width
+    if (imageAspectRatio > screenAspectRatio) {
+      return {
+        width: screen.width,
+        height: screen.width / imageAspectRatio,
+      };
+    }
+    // If image is taller or same aspect ratio, fit to screen height
+    else {
+      return {
+        width: screen.height * imageAspectRatio,
+        height: screen.height,
+      };
+    }
+  }, [imageSize]);
+
 
   const toolsFilter = [
     { name: 'Edge Sketch', icon: 'image-search-outline', lib: MCIcon, endpoint_filter_type: 'canny' },
@@ -78,8 +113,8 @@ const EditScreen = ({ route, navigation }) => {
     { name: 'Frost', icon: 'snowflake', lib: MCIcon, endpoint_filter_type: 'frost' },
     { name: 'Grayscale', icon: 'contrast-box', lib: MCIcon, endpoint_filter_type: 'grayscale' },
     { name: 'Pixelate', icon: 'grid', lib: MCIcon, endpoint_filter_type: 'pixelate' },
-    { name: 'Oil Paint', icon: 'palette-outline', lib: MCIcon, endpoint_filter_type: 'oil_paint' },
-    { name: 'Kaleidoscop', icon: 'shape-polygon-plus', lib: MCIcon, endpoint_filter_type: 'kalaidoscope' },
+    // { name: 'Oil Paint', icon: 'palette-outline', lib: MCIcon, endpoint_filter_type: 'oil_paint' },
+    // { name: 'Kaleidoscop', icon: 'shape-polygon-plus', lib: MCIcon, endpoint_filter_type: 'kalaidoscope' },
   ];
 
   const toolsEnhance = [
@@ -89,8 +124,8 @@ const EditScreen = ({ route, navigation }) => {
     { name: 'Auto Brightness', icon: 'brightness-auto', lib: MCIcon, endpoint_filter_type: 'auto_brightness' },
     { name: 'Remove Shadows', icon: 'brightness-4', lib: MCIcon, endpoint_filter_type: 'shadow_removal' },
     { name: 'Adjust Contrast', icon: 'contrast', lib: MCIcon, endpoint_filter_type: 'contrast_adjust' },
-    { name: 'Remove Background', icon: 'image-remove', lib: MCIcon, endpoint_filter_type: 'bgrem' },
     { name: 'Enhance Edges', icon: 'vector-line', lib: MCIcon, endpoint_filter_type: 'edge_enhance' },
+    // { name: 'Remove Background', icon: 'image-remove', lib: MCIcon, endpoint_filter_type: 'bgrem' },
   ];
 
   useEffect(() => {
@@ -188,9 +223,19 @@ const EditScreen = ({ route, navigation }) => {
       return;
     }
 
+    const cacheKey = `${currentImageUri}::${filterType}`;
+    if (imageCache.has(cacheKey)) {
+        console.log(`CACHE HIT: Displaying cached result for filter '${filterType}'.`);
+        setProcessedImageUri(imageCache.get(cacheKey));
+        if (displaySize.width > 0) {
+            transX.setValue(displaySize.width / 2);
+        }
+        return; 
+    }
+
+    console.log(`CACHE MISS: Fetching new result for filter '${filterType}'.`);
     setIsProcessing(true);
     try {
-      // --- START: ADAPTIVE COMPRESSION LOGIC ---
       let uriToUpload = currentImageUri;
       let compressionQuality = null;
 
@@ -198,15 +243,16 @@ const EditScreen = ({ route, navigation }) => {
         const fileInfo = await FileSystem.getInfoAsync(currentImageUri);
         if (fileInfo.exists && fileInfo.size) {
             const sizeInMB = fileInfo.size / (1024 * 1024);
+            console.log(`Original image size: ${sizeInMB.toFixed(2)}MB`);
             
             if (sizeInMB > HEAVY_COMPRESSION_THRESHOLD_MB) {
                 compressionQuality = HEAVY_COMPRESSION_QUALITY;
-                console.log(`Image is large (${sizeInMB.toFixed(2)}MB). Applying heavy compression.`);
+                console.log(`Applying heavy compression (Quality: ${compressionQuality}).`);
             } else if (sizeInMB > NO_COMPRESSION_THRESHOLD_MB) {
                 compressionQuality = MODERATE_COMPRESSION_QUALITY;
-                console.log(`Image is medium (${sizeInMB.toFixed(2)}MB). Applying moderate compression.`);
+                console.log(`Applying moderate compression (Quality: ${compressionQuality}).`);
             } else {
-                console.log(`Image is small (${sizeInMB.toFixed(2)}MB). No compression needed.`);
+                console.log(`No compression needed.`);
             }
         }
       } catch (e) {
@@ -219,16 +265,24 @@ const EditScreen = ({ route, navigation }) => {
           [],
           { 
             compress: compressionQuality,
-            format: ImageManipulator.SaveFormat.PNG,
+            format: ImageManipulator.SaveFormat.JPEG,
           }
         );
         uriToUpload = compressedImage.uri;
+        try {
+            const compressedFileInfo = await FileSystem.getInfoAsync(uriToUpload);
+            if (compressedFileInfo.exists && compressedFileInfo.size) {
+                const compressedSizeInMB = compressedFileInfo.size / (1024 * 1024);
+                console.log(`Compressed image size: ${compressedSizeInMB.toFixed(2)}MB`);
+            }
+        } catch(e) {
+            console.warn("Could not get compressed file info.", e);
+        }
       }
-      // --- END: ADAPTIVE COMPRESSION LOGIC ---
       
       const formData = new FormData();
       const filename = uriToUpload.split('/').pop();
-      const fileType = 'image/jpeg';
+      const fileType = filename.endsWith('.png') ? 'image/png' : 'image/jpeg';
       
       formData.append('file', {
         uri: uriToUpload,
@@ -248,24 +302,24 @@ const EditScreen = ({ route, navigation }) => {
 
       if (!response.ok) {
         let errorDetail = `HTTP error! status: ${response.status}`;
+        const errorText = await response.text();
         try {
-            const errorData = await response.json();
-            if (errorData.detail) {
+            const errorData = JSON.parse(errorText);
+            if (errorData && errorData.detail) {
                 if (Array.isArray(errorData.detail)) {
                     errorDetail = errorData.detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join('\n');
                 } else {
-                    errorDetail = errorData.detail;
+                    errorDetail = String(errorData.detail);
                 }
-            } else {
-                 errorDetail = `Server error: ${response.status}`;
             }
         } catch (e) {
-            const textError = await response.text();
-            errorDetail = textError || errorDetail;
+            if (errorText) {
+                errorDetail = errorText;
+            }
         }
         throw new Error(errorDetail);
       }
-
+      
       const imageBlob = await response.blob();
 
       if (imageBlob.size === 0) {
@@ -273,6 +327,17 @@ const EditScreen = ({ route, navigation }) => {
       }
       
       const dataUri = await blobToDataUri(imageBlob);
+
+      imageCache.set(cacheKey, dataUri);
+
+      if (imageCache.size > CACHE_MAX_SIZE) {
+        const oldestKey = imageCache.keys().next().value;
+        if (oldestKey) {
+          imageCache.delete(oldestKey);
+          console.log(`Cache limit reached. Removed oldest item: ${oldestKey}`);
+        }
+      }
+      
       setProcessedImageUri(dataUri);
 
       if (displaySize.width > 0) {
@@ -286,7 +351,6 @@ const EditScreen = ({ route, navigation }) => {
       setIsProcessing(false);
     }
   }, [currentImageUri, displaySize.width, transX]);
-
 
   const handleDownload = async () => {
     const imageToDownload = processedImageUri || currentImageUri;
@@ -377,55 +441,89 @@ const EditScreen = ({ route, navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} >
-      <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      <EditScreenHeader 
-        title={headerTitle}
-        onGoBack={() => navigation.goBack()} 
-        onDownload={handleDownload} 
-      />
-
-      <View style={styles.imageArea}>
-        <ImageProcessingOverlay isVisible={isProcessing} />
-        {processedImageUri ? (
-          <ImageComparisonView
-            originalImageUri={currentImageUri}
-            processedImageUri={processedImageUri}
-            displaySize={displaySize}
-            clampedSliderX={clampedSliderX}
-            onGestureEvent={onGestureEvent}
-            onHandlerStateChange={onHandlerStateChange}
-          />
-        ) : (
-          currentImageUri && displaySize.width > 0 && displaySize.height > 0 ? (
-            <View style={styles.singleImageContainer}>
-              <Image
-                source={{ uri: currentImageUri }}
-                style={{ width: displaySize.width, height: displaySize.height }}
-                resizeMode="contain"
-              />
-              {currentTools.length > 0 && (
-                <Text style={styles.instructionText}>
-                  Select a filter from below
-                </Text>
-              )}
-            </View>
-          ) : (
-             <View style={styles.placeholderContainer}>
-                {!currentImageUri && !isLoadingImageSize && <MCIcon name="image-off-outline" size={60} color="#888" />}
-             </View>
-          )
-        )}
-      </View>
-
-      {currentTools.length > 0 && displaySize.width > 0 && (
-        <ToolsTray
-          tools={currentTools}
-          onToolPress={applyFilter}
-          isProcessing={isProcessing}
+    <>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" backgroundColor="#121212" />
+        <EditScreenHeader 
+          title={headerTitle}
+          onGoBack={() => navigation.goBack()} 
+          onDownload={handleDownload} 
         />
-      )}
-    </SafeAreaView>
+
+        <View style={styles.imageArea}>
+          <ImageProcessingOverlay isVisible={isProcessing} />
+          {processedImageUri ? (
+            <ImageComparisonView
+              originalImageUri={currentImageUri}
+              processedImageUri={processedImageUri}
+              displaySize={displaySize}
+              clampedSliderX={clampedSliderX}
+              onGestureEvent={onGestureEvent}
+              onHandlerStateChange={onHandlerStateChange}
+              onExpandPress={() => setIsFullScreen(true)}
+            />
+          ) : (
+            currentImageUri && displaySize.width > 0 && displaySize.height > 0 ? (
+              <View style={styles.singleImageContainer}>
+                <Image
+                  source={{ uri: currentImageUri }}
+                  style={{ width: displaySize.width, height: displaySize.height }}
+                  resizeMode="contain"
+                />
+                {currentTools.length > 0 && (
+                  <Text style={styles.instructionText}>
+                    Select a filter from below
+                  </Text>
+                )}
+              </View>
+            ) : (
+              <View style={styles.placeholderContainer}>
+                  {!currentImageUri && !isLoadingImageSize && <MCIcon name="image-off-outline" size={60} color="#888" />}
+              </View>
+            )
+          )}
+        </View>
+
+        {currentTools.length > 0 && displaySize.width > 0 && (
+          <ToolsTray
+            tools={currentTools}
+            onToolPress={applyFilter}
+            isProcessing={isProcessing}
+          />
+        )}
+      </SafeAreaView>
+
+      <Modal
+        visible={isFullScreen}
+        transparent={true}
+        onRequestClose={() => setIsFullScreen(false)}
+      >
+        <View style={styles.modalContainer}>
+            <ImageZoom
+              cropWidth={Dimensions.get('window').width}
+              cropHeight={Dimensions.get('window').height}
+              // --- UPDATED: Use the calculated "contain" dimensions ---
+              imageWidth={modalImageDisplaySize.width}
+              imageHeight={modalImageDisplaySize.height}
+              minScale={0.8} // You might want to adjust this, 1 is also a good value
+            >
+              <Image
+                  style={{ 
+                    width: modalImageDisplaySize.width, 
+                    height: modalImageDisplaySize.height 
+                  }}
+                  source={{ uri: processedImageUri }}
+              />
+            </ImageZoom>
+            <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => setIsFullScreen(false)}
+            >
+                <IoniconsIcon name="close" size={30} color="white" />
+            </TouchableOpacity>
+        </View>
+      </Modal>
+    </>
   );
 };
 
@@ -466,6 +564,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     paddingHorizontal: 20, 
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
   },
 });
 

@@ -16,7 +16,7 @@ const featuresData = [
       { name: 'X-Ray', tokens: 2 }, { name: 'Cartoon', tokens: 4 },
       { name: 'Kaleidoscope', tokens: 2 }, { name: 'Grayscale', tokens: 1 },
       { name: 'Invert Colors', tokens: 1 }, { name: 'Pixelate', tokens: 2 },
-      { name: 'Oil Paint', tokens: 5 },
+      // { name: 'Oil Paint', tokens: 5 },
     ]
   },
   {
@@ -26,7 +26,8 @@ const featuresData = [
       { name: 'Enhance', tokens: 3 }, { name: 'Reduce Noise', tokens: 4 },
       { name: 'Upscale', tokens: 5 }, { name: 'Auto Brightness', tokens: 2 },
       { name: 'Remove Shadows', tokens: 3 }, { name: 'Adjust Contrast', tokens: 2 },
-      { name: 'Remove Background', tokens: 5 }, { name: 'Enhance Edges', tokens: 3 },
+      // { name: 'Remove Background', tokens: 5 },
+       { name: 'Enhance Edges', tokens: 3 },
     ]
   }
 ];

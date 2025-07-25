@@ -10,7 +10,6 @@ import EditScreen from './screens/EditScreen';
 import TokenScreen from './screens/TokenScreen';
 import FeatureTestScreen from './screens/FeatureTestScreen';
 import RecolorScreen from './screens/RecolorScreen'; 
-import Test from './screens/TestScreen'; // Importing TestScreen
 
 
 const Stack = createNativeStackNavigator();
@@ -24,7 +23,6 @@ const App = () => {
             screenOptions={{
               headerShown: false,
             }}>
-            <Stack.Screen name="Test" component={Test} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Token" component={TokenScreen} />
             <Stack.Screen name="FeatureTest" component={FeatureTestScreen} />

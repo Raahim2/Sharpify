@@ -17,8 +17,12 @@ import PhotoActionModal from '../components/HomeScreen/PhotoActionModal';
 // --- NEW: Define your local assets here ---
 const LOCAL_ASSET_MODULES = [
   require('../assets/logo.png'),
-  // require('../assets/5mbSample.jpg'),
-
+  // require('../assets/1.jpg'),
+  // require('../assets/2.jpg'),
+  // require('../assets/3.jpg'),
+  // require('../assets/4.jpg'),
+  // require('../assets/5.jpg'),
+  // require('../assets/6.jpg'),
 ];
 
 

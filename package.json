@@ -1,6 +1,6 @@
 {
   "name": "sharpify",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -20,11 +20,10 @@
     "react-native": "0.79.3",
     "react-native-async-storage": "^0.0.1",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-image-pan-zoom": "^2.1.12",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "^4.11.1",
-    "react-native-vector-icons": "^10.2.0",
-    "expo-asset": "~11.1.7",
-    "expo-file-system": "~18.1.11"
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@types/react": "~19.0.10"

@@ -19,7 +19,7 @@ import EditScreenHeader from '../components/EditScreen/header';
 
 const ORIGINAL_IMAGE_ID = 'original';
 const PREDEFINED_COLORS = [ ORIGINAL_IMAGE_ID, '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#8E8E93', '#FFFFFF', '#000000', '#A2845E' ];
-const CLOUDINARY_CLOUD_NAME = 'SECRET-CLOUDINARY-CLOUD-NAME'; // Replace with your actual Cloudinary cloud name
+const CLOUDINARY_CLOUD_NAME = 'defyovyob'; // Replace with your actual Cloudinary cloud name
 const CLOUDINARY_UPLOAD_PRESET = 'Sharpify';
 
 // This key will be used to store our cache object in the phone's storage

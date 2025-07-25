@@ -1,9 +1,9 @@
 // components/ImageComparisonView.js
 import React from 'react';
-import { View, Text, Image, Animated, StyleSheet } from 'react-native';
+import { View, Text, Image, Animated, StyleSheet, TouchableOpacity } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import IoniconsIcon from 'react-native-vector-icons/Ionicons';
-import { SLIDER_HANDLE_WIDTH } from './constants'; // Adjust path
+import { SLIDER_HANDLE_WIDTH } from './constants';
 
 const ImageComparisonView = ({
   originalImageUri,
@@ -12,6 +12,7 @@ const ImageComparisonView = ({
   clampedSliderX,
   onGestureEvent,
   onHandlerStateChange,
+  onExpandPress, // <-- NEW: Callback prop for the expand button
 }) => {
   const afterImageSourceUri = processedImageUri || originalImageUri;
 
@@ -30,6 +31,11 @@ const ImageComparisonView = ({
       <View style={styles.labelContainerAfter}>
         <Text style={styles.labelText}>After</Text>
       </View>
+
+      {/* NEW: Fullscreen expand button */}
+      <TouchableOpacity style={styles.expandButton} onPress={onExpandPress}>
+        <IoniconsIcon name="expand-outline" size={22} color="white" />
+      </TouchableOpacity>
 
       <Animated.View
         style={{
@@ -105,6 +111,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, shadowRadius: 2,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 2,
+  },
+  // NEW Style for the expand button
+  expandButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 6,
+    borderRadius: 18,
+    zIndex: 2,
   },
 });
 
