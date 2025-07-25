@@ -5,11 +5,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import HomeScreen from './screens/HomeScreen';
-import EditScreen from './screens/EditScreen';
+// import HomeScreen from './screens/HomeScreen';
+// import EditScreen from './screens/EditScreen';
 import TokenScreen from './screens/TokenScreen';
-import FeatureTestScreen from './screens/FeatureTestScreen';
-import RecolorScreen from './screens/RecolorScreen'; 
+// import FeatureTestScreen from './screens/FeatureTestScreen';
+// import RecolorScreen from './screens/RecolorScreen'; 
+import Test from './screens/TestScreen'; // Importing TestScreen
 
 
 const Stack = createNativeStackNavigator();
@@ -23,11 +24,12 @@ const App = () => {
             screenOptions={{
               headerShown: false,
             }}>
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Test" component={Test} />
+           {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
             <Stack.Screen name="Token" component={TokenScreen} />
-            <Stack.Screen name="FeatureTest" component={FeatureTestScreen} />
+            {/* <Stack.Screen name="FeatureTest" component={FeatureTestScreen} />
             <Stack.Screen name="Edit" component={EditScreen} />
-            <Stack.Screen name="Recolor" component={RecolorScreen} />
+            <Stack.Screen name="Recolor" component={RecolorScreen} /> */}
           </Stack.Navigator>
         </NavigationContainer>
       </View>

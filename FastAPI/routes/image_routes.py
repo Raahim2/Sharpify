@@ -1,7 +1,8 @@
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi import Query 
-from services import auto_brightness, contrast_adjust, grayscale, canny, invert , sketch, pixelate, comic , sharpen, auto_enhance , denoise  ,shadow_removal , bgrem ,  edge_enhance, oil_paint, color_sketch, water_color, heat, ascii_art, frost, xray, cartoon , kalaidoscope
+from services.filters import grayscale, canny, invert , sketch, pixelate, comic , oil_paint, color_sketch, water_color, heat, ascii_art, frost, xray, cartoon , dot , thread , retro , neon , haunted
+from services.enhance import auto_brightness, auto_enhance, denoise, shadow_removal, sharpen
 
 
 router = APIRouter()
@@ -9,7 +10,6 @@ router = APIRouter()
 # =================================
 # Image Enhancement Endpoints
 # =================================
-
 @router.post("/denoise")
 async def apply_denoise(file: UploadFile = File(...),strength: int = Query(10, ge=1, le=50, description="Denoising strength for NLM. Higher is stronger.")):
     result_stream = await denoise.process(file, strength_h=strength)
@@ -35,20 +35,9 @@ async def apply_shadow_removal(file: UploadFile = File(...)):
     result_stream = await shadow_removal.process(file)
     return StreamingResponse(result_stream, media_type="image/jpeg")
 
-@router.post("/contrast_adjust")  #✅
-async def apply_contrast_adjust(file: UploadFile = File(...)):
-    result_stream = await contrast_adjust.process(file)
-    return StreamingResponse(result_stream, media_type="image/jpeg")
 
-@router.post("/bgrem")  #✅
-async def apply_bgrem(file: UploadFile = File(...)):
-    result_stream = await bgrem.process(file)
-    return StreamingResponse(result_stream, media_type="image/jpeg")
 
-@router.post("/edge_enhance")  #✅
-async def apply_edge_enhance(file: UploadFile = File(...)):
-    result_stream = await edge_enhance.process(file)
-    return StreamingResponse(result_stream, media_type="image/jpeg")
+
 
 
 # =================================
@@ -69,9 +58,29 @@ async def sketchify(file: UploadFile = File(...)):
     result = await sketch.process(file)
     return StreamingResponse(result, media_type="image/jpeg")
 
+@router.post("/dot")  #✅
+async def dotify(file: UploadFile = File(...)):
+    result = await dot.process(file)
+    return StreamingResponse(result, media_type="image/jpeg")
+
 @router.post("/oil_paint")  #✅
 async def apply_oil_paint(file: UploadFile = File(...)):
     result = await oil_paint.process(file)
+    return StreamingResponse(result, media_type="image/jpeg")
+
+@router.post("/retro")  #✅
+async def apply_retro(file: UploadFile = File(...)):
+    result = await retro.process(file)
+    return StreamingResponse(result, media_type="image/jpeg")
+
+@router.post("/neon")  #✅
+async def apply_neon(file: UploadFile = File(...)):
+    result = await neon.process(file)
+    return StreamingResponse(result, media_type="image/jpeg")
+
+@router.post("/haunted")  #✅
+async def apply_haunted(file: UploadFile = File(...)):
+    result = await haunted.process(file)
     return StreamingResponse(result, media_type="image/jpeg")
 
 @router.post("/color_sketch")  #✅
@@ -94,6 +103,11 @@ async def convert_to_ascii(file: UploadFile = File(...)):
     result = await ascii_art.process(file)
     return StreamingResponse(result, media_type="image/jpeg")
 
+@router.post("/thread")  #✅
+async def threadify(file: UploadFile = File(...)):
+    result = await thread.process(file)
+    return StreamingResponse(result, media_type="image/jpeg")
+
 @router.post("/frost")  #✅
 async def apply_frost(file: UploadFile = File(...)):
     result = await frost.process(file)
@@ -109,10 +123,6 @@ async def apply_cartoon(file: UploadFile = File(...)):
     result = await cartoon.process(file)
     return StreamingResponse(result, media_type="image/jpeg")
 
-@router.post("/kalaidoscope")  #✅
-async def apply_kalaidoscope(file: UploadFile = File(...), segments: int = Query(6, ge=3, le=12, description="Number of segments for the kaleidoscope effect.")):
-    result = await kalaidoscope.process(file, segments=segments)
-    return StreamingResponse(result, media_type="image/jpeg")
                            
 @router.post("/grayscale")  #✅
 async def convert_to_grayscale(file: UploadFile = File(...)):
