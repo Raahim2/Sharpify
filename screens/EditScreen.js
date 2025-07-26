@@ -1,5 +1,4 @@
-// EnhanceScreen.js
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'; // NEW: Import useMemo
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -33,6 +32,7 @@ import EditScreenHeader from '../components/EditScreen/header';
 import ImageProcessingOverlay from '../components/EditScreen/ImageProcessingOverlay';
 import ImageComparisonView from '../components/EditScreen/ImageComparisonView';
 import ToolsTray from '../components/EditScreen/ToolsTray';
+import FilterImageTray from '../components/EditScreen/FilterImageTray';
 
 const NO_COMPRESSION_THRESHOLD_MB = 1.5;
 const HEAVY_COMPRESSION_THRESHOLD_MB = 6.5;
@@ -73,7 +73,6 @@ const EditScreen = ({ route, navigation }) => {
   const dragX = useRef(new Animated.Value(0)).current;
   const transX = useRef(new Animated.Value(SCREEN_WIDTH / 2)).current;
 
-  // --- NEW: Calculate "contain" dimensions for the fullscreen modal ---
   const modalImageDisplaySize = useMemo(() => {
     if (!imageSize.width || !imageSize.height) {
       return { width: 0, height: 0 };
@@ -82,14 +81,12 @@ const EditScreen = ({ route, navigation }) => {
     const imageAspectRatio = imageSize.width / imageSize.height;
     const screenAspectRatio = screen.width / screen.height;
 
-    // If image is wider than the screen aspect ratio, fit to screen width
     if (imageAspectRatio > screenAspectRatio) {
       return {
         width: screen.width,
         height: screen.width / imageAspectRatio,
       };
     }
-    // If image is taller or same aspect ratio, fit to screen height
     else {
       return {
         width: screen.height * imageAspectRatio,
@@ -98,7 +95,10 @@ const EditScreen = ({ route, navigation }) => {
     }
   }, [imageSize]);
 
-
+  // --- NEW: Define the base URL for the filter demo images ---
+  // Note the use of the "raw" GitHub content URL
+  const FILTER_DEMO_BASE_URL = 'https://raw.githubusercontent.com/Raahim2/Sharpify/main/FastAPI/demo';
+  // --- NEW: The toolsFilter array is now mapped to include the image URL ---
   const toolsFilter = [
     { name: 'Edge Sketch', icon: 'image-search-outline', lib: MCIcon, endpoint_filter_type: 'canny' },
     { name: 'ASCII Art', icon: 'code-tags', lib: MCIcon, endpoint_filter_type: 'ascii_art' },
@@ -113,9 +113,10 @@ const EditScreen = ({ route, navigation }) => {
     { name: 'Frost', icon: 'snowflake', lib: MCIcon, endpoint_filter_type: 'frost' },
     { name: 'Grayscale', icon: 'contrast-box', lib: MCIcon, endpoint_filter_type: 'grayscale' },
     { name: 'Pixelate', icon: 'grid', lib: MCIcon, endpoint_filter_type: 'pixelate' },
-    // { name: 'Oil Paint', icon: 'palette-outline', lib: MCIcon, endpoint_filter_type: 'oil_paint' },
-    // { name: 'Kaleidoscop', icon: 'shape-polygon-plus', lib: MCIcon, endpoint_filter_type: 'kalaidoscope' },
-  ];
+  ].map(tool => ({
+    ...tool,
+    imageUrl: `${FILTER_DEMO_BASE_URL}/${encodeURIComponent(tool.name)}.png`,
+  }));
 
   const toolsEnhance = [
     { name: 'Upscale', icon: 'auto-fix', lib: MCIcon, endpoint_filter_type: 'auto_enhance' },
@@ -125,7 +126,6 @@ const EditScreen = ({ route, navigation }) => {
     { name: 'Remove Shadows', icon: 'brightness-4', lib: MCIcon, endpoint_filter_type: 'shadow_removal' },
     { name: 'Adjust Contrast', icon: 'contrast', lib: MCIcon, endpoint_filter_type: 'contrast_adjust' },
     { name: 'Enhance Edges', icon: 'vector-line', lib: MCIcon, endpoint_filter_type: 'edge_enhance' },
-    // { name: 'Remove Background', icon: 'image-remove', lib: MCIcon, endpoint_filter_type: 'bgrem' },
   ];
 
   useEffect(() => {
@@ -430,7 +430,7 @@ const EditScreen = ({ route, navigation }) => {
          <StatusBar barStyle="light-content" backgroundColor="#121212" />
         <EditScreenHeader 
             title={headerTitle || (currentMode === 'enhance' ? 'Enhance Image' : 'Apply Filter')}
-            onGoBack={() => navigation.goBack()} 
+            onGoBack={() => navigation.goBacl()} 
             onDownload={handleDownload} 
         />
         <View style={styles.loadingContainer}>
@@ -484,12 +484,24 @@ const EditScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        {currentTools.length > 0 && displaySize.width > 0 && (
-          <ToolsTray
-            tools={currentTools}
-            onToolPress={applyFilter}
-            isProcessing={isProcessing}
-          />
+        {/* --- MODIFIED: Connect the `applyFilter` function to the `onToolPress` prop --- */}
+        {displaySize.width > 0 && (
+          <>
+            {currentMode === 'filter' && (
+              <FilterImageTray
+                tools={currentTools}
+                onToolPress={applyFilter}
+                isProcessing={isProcessing}
+              />
+            )}
+            {currentMode === 'enhance' && (
+              <ToolsTray
+                tools={currentTools}
+                onToolPress={applyFilter}
+                isProcessing={isProcessing}
+              />
+            )}
+          </>
         )}
       </SafeAreaView>
 
@@ -502,10 +514,9 @@ const EditScreen = ({ route, navigation }) => {
             <ImageZoom
               cropWidth={Dimensions.get('window').width}
               cropHeight={Dimensions.get('window').height}
-              // --- UPDATED: Use the calculated "contain" dimensions ---
               imageWidth={modalImageDisplaySize.width}
               imageHeight={modalImageDisplaySize.height}
-              minScale={0.8} // You might want to adjust this, 1 is also a good value
+              minScale={0.8}
             >
               <Image
                   style={{ 

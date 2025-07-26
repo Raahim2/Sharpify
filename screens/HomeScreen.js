@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StatusBar, StyleSheet, View, Text, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,15 +13,11 @@ import BottomNavigation from '../components/HomeScreen/BottomNavigation';
 import ImageSelectionModal from '../components/HomeScreen/ImageSelectionModal';
 import PhotoActionModal from '../components/HomeScreen/PhotoActionModal';
 
-// --- NEW: Define your local assets here ---
+// --- Define your local assets here ---
 const LOCAL_ASSET_MODULES = [
   require('../assets/logo.png'),
   // require('../assets/1.jpg'),
   // require('../assets/2.jpg'),
-  // require('../assets/3.jpg'),
-  // require('../assets/4.jpg'),
-  // require('../assets/5.jpg'),
-  // require('../assets/6.jpg'),
 ];
 
 
@@ -40,13 +35,11 @@ const HomeScreen = ({ navigation }) => {
   const [isPhotoActionModalVisible, setIsPhotoActionModalVisible] = useState(false);
   const [selectedGridPhoto, setSelectedGridPhoto] = useState(null);
 
-  // --- NEW: State for local assets and control flag ---
   const [localAssets, setLocalAssets] = useState([]);
   const [showLocalAssets, setShowLocalAssets] = useState(false);
 
   const isLoadingMoreRef = useRef(false);
 
-  // --- NEW: useEffect to load local assets on component mount ---
   useEffect(() => {
     const loadLocalAssets = async () => {
       try {
@@ -86,7 +79,7 @@ const HomeScreen = ({ navigation }) => {
       setPhotos([]);
       setAfter(null);
       setHasNextPage(true);
-      setShowLocalAssets(false); // --- NEW: Reset flag on refresh
+      setShowLocalAssets(false);
       cursorForThisFetch = null;
     } else {
       if (isLoadingMoreRef.current || !pagHasNextPage) return;
@@ -108,13 +101,11 @@ const HomeScreen = ({ navigation }) => {
       const media = await MediaLibrary.getAssetsAsync(mediaOptions);
       const newPhotos = media.assets;
       
-      // --- NEW: Logic to decide whether to show local assets ---
       if (isInitialFetch) {
         if (newPhotos.length > 0) {
           setPhotos(newPhotos);
           setShowLocalAssets(false);
         } else {
-          // No photos found in library, so we'll show our samples
           setShowLocalAssets(true);
         }
       } else if (newPhotos.length > 0) {
@@ -129,7 +120,7 @@ const HomeScreen = ({ navigation }) => {
       console.error("Fetch Photos Error:", e);
       if (isInitialFetch) {
         setPhotos([]);
-        setShowLocalAssets(true); // Show local assets on error too
+        setShowLocalAssets(true);
       }
     } finally {
       if (isInitialFetch) {
@@ -161,7 +152,6 @@ const HomeScreen = ({ navigation }) => {
       setHasNextPage(true);
       setIsLoading(false);
       setIsLoadingMore(false);
-      // --- NEW: If no permission, still show local assets ---
       setShowLocalAssets(true);
     }
   }, [permissionResponse, fetchPhotosInternal]);
@@ -186,8 +176,6 @@ const HomeScreen = ({ navigation }) => {
     setIsPhotoActionModalVisible(true);
   };
   
-
-
   const openImageSelectionModal = (purpose) => {
     setImageSelectionModalPurpose(purpose);
     setIsImageSelectionModalVisible(true);
@@ -259,26 +247,35 @@ const HomeScreen = ({ navigation }) => {
   const renderContent = () => {
     if (isLoading) return <ActivityIndicator size="large" color="#fff" style={styles.loader} />;
     
-    // --- NEW: If showing local assets, render them in the grid ---
     if (showLocalAssets) {
       if (localAssets.length > 0) {
         return (
-          <>
+          <View style={{ flex: 1 }}>
             <Text style={styles.sampleHeaderText}>No Photos Found. Try our samples!</Text>
+            
+            {!permissionResponse?.granted && (
+              <View style={styles.permissionPromptContainer}>
+                <PermissionDisplay
+                  message="Or, grant access to see your own photos."
+                  showGrantButton={permissionResponse?.canAskAgain}
+                  grantButtonText="Grant Permission"
+                  onGrantPress={handleRequestPermission}
+                />
+              </View>
+            )}
+
             <PhotoGrid 
               photos={localAssets} 
               onPressPhoto={handlePhotoPress}
-              onEndReached={() => {}} // No "load more" for local assets
+              onEndReached={() => {}}
               isLoadingMore={false}
             />
-          </>
+          </View>
         );
       }
-      // Fallback if local assets also fail to load
       return <PermissionDisplay message="No photos found." />;
     }
 
-    // --- ORIGINAL LOGIC (now only runs if local assets are not being shown) ---
     if (!permissionResponse?.granted) {
       const msg = permissionResponse?.canAskAgain 
         ? 'Photo access permission is required to display your images.' 
@@ -337,12 +334,17 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   videoPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   placeholderText: { color: 'white', fontSize: 16, textAlign: 'center', marginBottom: 20 },
-  sampleHeaderText: { // --- NEW STYLE ---
+  sampleHeaderText: {
     color: '#ccc',
     fontSize: 16,
     textAlign: 'center',
     paddingVertical: 15,
     backgroundColor: '#1C1C1E'
+  },
+  permissionPromptContainer: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2C2C2E',
   },
 });
 

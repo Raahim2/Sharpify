@@ -40,7 +40,6 @@ const SPACING = { small: 8, medium: 16, large: 24 };
 const FONT_SIZES = { title: 28, subtitle: 16, body: 14 };
 
 // --- Model & Asset Management ---
-
 const BASE_URL = 'https://github.com/Raahim2/Sharpify/raw/refs/heads/main/models/';
 
 const AVAILABLE_MODELS = [

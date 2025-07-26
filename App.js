@@ -10,7 +10,7 @@ import EditScreen from './screens/EditScreen';
 import TokenScreen from './screens/TokenScreen';
 import FeatureTestScreen from './screens/FeatureTestScreen';
 import RecolorScreen from './screens/RecolorScreen'; 
-import Test from './screens/Test'
+// import Test from './screens/Test'
 
 
 const Stack = createNativeStackNavigator();
@@ -24,7 +24,7 @@ const App = () => {
             screenOptions={{
               headerShown: false,
             }}>
-            <Stack.Screen name="Test" component={Test} />
+            {/* <Stack.Screen name="Test" component={Test} /> */}
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Token" component={TokenScreen} />
             <Stack.Screen name="FeatureTest" component={FeatureTestScreen} />
@@ -38,5 +38,3 @@ const App = () => {
 };
 
 export default App;
-
-// npx expo install @tensorflow/tfjs @tensorflow/tfjs-react-native expo-gl expo-asset

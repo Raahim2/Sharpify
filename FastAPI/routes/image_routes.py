@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi import Query 
 from services.filters import grayscale, canny, invert , sketch, pixelate, comic , oil_paint, color_sketch, water_color, heat, ascii_art, frost, xray, cartoon , dot , thread , retro , neon , haunted
-from services.enhance import auto_brightness, auto_enhance, denoise, shadow_removal, sharpen
+from services.enhance import auto_brightness, auto_enhance, denoise, shadow_removal, sharpen , bgrem
 
 
 router = APIRouter()
@@ -33,6 +33,12 @@ async def apply_auto_brightness(file: UploadFile = File(...)):
 @router.post("/shadow_removal")  #✅
 async def apply_shadow_removal(file: UploadFile = File(...)):
     result_stream = await shadow_removal.process(file)
+    return StreamingResponse(result_stream, media_type="image/jpeg")
+
+
+@router.post("/bgrem")  #✅
+async def bgrem(file: UploadFile = File(...)):
+    result_stream = await bgrem.process(file)
     return StreamingResponse(result_stream, media_type="image/jpeg")
 
 
