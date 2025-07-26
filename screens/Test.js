@@ -40,9 +40,8 @@ const SPACING = { small: 8, medium: 16, large: 24 };
 const FONT_SIZES = { title: 28, subtitle: 16, body: 14 };
 
 // --- Model & Asset Management ---
-// These are real, working URLs from public GitHub repos for immediate testing.
-// Replace these with your own raw GitHub URLs when you host your models.
-const BASE_URL = 'https://github.com/Raahim2/Sharpify/models/';
+
+const BASE_URL = 'https://github.com/Raahim2/Sharpify/raw/refs/heads/main/models/';
 
 const AVAILABLE_MODELS = [
   { name: 'Candy', filename: 'candy-9.onnx', type: 'style_transfer', url: `${BASE_URL}candy-9.onnx` },
@@ -50,8 +49,8 @@ const AVAILABLE_MODELS = [
   { name: 'Pointilism', filename: 'pointilism-9.onnx', type: 'style_transfer', url: `${BASE_URL}pointilism-9.onnx` },
   { name: 'Rain Princess', filename: 'rain-princess-9.onnx', type: 'style_transfer', url: `${BASE_URL}rain-princess-9.onnx` },
   { name: 'Udnie', filename: 'udnie-9.onnx', type: 'style_transfer', url: `${BASE_URL}udnie-9.onnx` },
-  { name: 'AnimeGAN', filename: 'AnimeGANv2_Hayao.onnx', type: 'animegan', url: `${BASE_URL}AnimeGANv2_Hayao.onnx` }, // Note: Using a specific named AnimeGAN for clarity
-  { name: 'AnimeGAN v2', filename: 'AnimeGANv2_Paprika.onnx', type: 'animegan', url: `${BASE_URL}AnimeGANv2_Paprika.onnx` },
+  { name: 'AnimeGAN', filename: 'AnimieGan.onnx', type: 'animegan', url: `${BASE_URL}AnimieGan.onnxonnx` }, // Note: Using a specific named AnimeGAN for clarity
+  { name: 'AnimeGAN v2', filename: 'AnimieGan.onnx2.onnx', type: 'animegan', url: `${BASE_URL}AnimieGan.onnx` },
   { name: 'Shinkai', filename: 'Shinkai.onnx', type: 'animegan', url: `${BASE_URL}Shinkai.onnx` },
 ];
 
