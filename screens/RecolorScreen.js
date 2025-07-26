@@ -168,8 +168,8 @@ const RecolorScreen = ({ route, navigation }) => {
                 <View style={styles.controlsSection}>
                     <ScrollView>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Items to recolor (e.g., the shirt):</Text>
-                            <TextInput style={styles.textInput} placeholder="e.g., the red car, person's hat" placeholderTextColor="#777" value={itemToRecolor} onChangeText={setItemToRecolor} />
+                            <Text style={styles.inputLabel}>Items to recolor:</Text>
+                            <TextInput style={styles.textInput} placeholder="e.g., shirt ,sofa " placeholderTextColor="#777" value={itemToRecolor} onChangeText={setItemToRecolor} />
                         </View>
                         <View style={styles.colorPaletteGroup}>
                             <Text style={styles.colorPaletteLabel}>Choose new color:</Text>

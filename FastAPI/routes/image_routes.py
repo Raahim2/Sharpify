@@ -42,10 +42,6 @@ async def bgrem(file: UploadFile = File(...)):
     return StreamingResponse(result_stream, media_type="image/jpeg")
 
 
-
-
-
-
 # =================================
 # Image Filter Endpoints
 # =================================

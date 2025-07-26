@@ -204,6 +204,11 @@ const HomeScreen = ({ navigation }) => {
           imageUri: selectedMediaItem.uri,
           imageId: selectedMediaItem.id,
         });
+      }else if (currentPurpose === 'styletransfer') {
+        navigation.navigate('StyleTransfer', {
+          imageUri: selectedMediaItem.uri,
+          imageId: selectedMediaItem.id,
+        });
       }
     }
   };
@@ -234,13 +239,20 @@ const HomeScreen = ({ navigation }) => {
     handlePhotoActionModalClose();
   };
 
-  const handlePhotoActionSelectEnhance = () => navigateToEditScreen('enhance');
-  const handlePhotoActionSelectFilter = () => navigateToEditScreen('filter');
-  const handlePhotoActionSelectRecolor = () => navigateToRecolorScreen(); 
+    const navigateStyleTransferScreen = () => {
+    if (selectedGridPhoto) {
+      navigation.navigate('StyleTransfer', {
+        imageUri: selectedGridPhoto.uri,
+        imageId: selectedGridPhoto.id,
+      });
+    }
+    handlePhotoActionModalClose();
+  };
 
   const handleEnhancePress = () => openImageSelectionModal('enhance');
   const handleAiFiltersPress = () => openImageSelectionModal('aiFilters'); 
   const handleRecolorPress = () => openImageSelectionModal('recolor');
+  const handleStyleTransferPress = () => openImageSelectionModal('styletransfer');
 
   const handletokenPress = () => navigation.navigate('Token'); 
 
@@ -306,6 +318,7 @@ const HomeScreen = ({ navigation }) => {
           onEnhancePress={handleEnhancePress}
           onAiFiltersPress={handleAiFiltersPress}
           onRecolorPress={handleRecolorPress}
+          onStyleTransferPress={handleStyleTransferPress}
         />
       </View>
       <ImageSelectionModal
@@ -320,9 +333,10 @@ const HomeScreen = ({ navigation }) => {
         visible={isPhotoActionModalVisible}
         imageUri={selectedGridPhoto?.uri} 
         onClose={handlePhotoActionModalClose}
-        onSelectEnhance={handlePhotoActionSelectEnhance}
-        onSelectFilter={handlePhotoActionSelectFilter}
-        onSelectRecolor={handlePhotoActionSelectRecolor}
+        onSelectEnhance={() => navigateToEditScreen('enhance')}
+        onSelectFilter={() => navigateToEditScreen('filter')}
+        onSelectRecolor={navigateToRecolorScreen}
+        onSelectStyleTransfer={navigateStyleTransferScreen}
       />
     </SafeAreaView>
   );

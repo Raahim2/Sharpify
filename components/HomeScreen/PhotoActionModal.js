@@ -9,7 +9,8 @@ const PhotoActionModal = ({
   onClose, 
   onSelectEnhance, 
   onSelectFilter, 
-  onSelectRecolor // New prop for the recolor action
+  onSelectRecolor,
+  onSelectStyleTransfer // New prop for the style transfer action
 }) => {
   if (!visible) return null;
 
@@ -34,7 +35,7 @@ const PhotoActionModal = ({
 
           <Text style={styles.modalTitle}>Choose an Action</Text>
 
-          {/* --- UPDATED: Actions row now holds three items --- */}
+          {/* --- UPDATED: Actions row now holds four items --- */}
           <View style={styles.actionsRow}>
             {/* Enhance Button */}
             <TouchableOpacity style={styles.actionContainer} onPress={onSelectEnhance}>
@@ -52,13 +53,23 @@ const PhotoActionModal = ({
               <Text style={styles.actionButtonText}>AI Filter</Text>
             </TouchableOpacity>
 
-            {/* --- NEW: AI Recolor Button --- */}
+            <TouchableOpacity style={styles.actionContainer} onPress={onSelectStyleTransfer}>
+              <View style={[styles.actionButton, styles.styleTransferButton]}>
+                <MCIcon name="palette-swatch" size={30} color="#FFFFFF" />
+              </View>
+              <Text style={styles.actionButtonText}>Style</Text>
+            </TouchableOpacity>
+
+            {/* AI Recolor Button */}
             <TouchableOpacity style={styles.actionContainer} onPress={onSelectRecolor}>
               <View style={[styles.actionButton, styles.recolorButton]}>
-                <MCIcon name="palette-swatch" size={30} color="#FFFFFF" />
+                <MCIcon name="format-color-fill" size={30} color="#FFFFFF" />
               </View>
               <Text style={styles.actionButtonText}>Recolor</Text>
             </TouchableOpacity>
+
+            {/* --- NEW: Style Transfer Button --- */}
+            
           </View>
 
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
@@ -75,10 +86,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Darker overlay for better focus
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalContentContainer: {
-    backgroundColor: '#2C2C2E', // Modern dark gray (like iOS alerts)
+    backgroundColor: '#2C2C2E',
     borderRadius: 22,
     padding: 20,
     width: '90%',
@@ -90,14 +101,14 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)', // Subtle border for a "glass edge" effect
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   imagePreview: {
     width: '100%',
     height: 220,
     borderRadius: 16,
     marginBottom: 25,
-    backgroundColor: '#3C3C3E', // Placeholder background
+    backgroundColor: '#3C3C3E',
   },
   imagePlaceholder: {
     justifyContent: 'center',
@@ -117,21 +128,21 @@ const styles = StyleSheet.create({
   },
   actionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Evenly space the three items
+    justifyContent: 'space-around', // This will now space four items
     width: '100%',
     marginBottom: 25,
   },
   actionContainer: {
-    alignItems: 'center', // Center the button and text vertically
+    alignItems: 'center',
+    flex: 1, // Allow items to take up equal space
   },
   actionButton: {
-    width: 70, // Uniform size for the circle
-    height: 70,
-    borderRadius: 35, // Makes it a perfect circle
+    width: 65, // Slightly smaller to fit four buttons comfortably
+    height: 65,
+    borderRadius: 32.5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10, // Space between circle and text
-     // Give buttons a nice shadow
+    marginBottom: 10,
      shadowColor: '#000',
      shadowOffset: { width: 0, height: 2 },
      shadowOpacity: 0.25,
@@ -144,16 +155,20 @@ const styles = StyleSheet.create({
   filterButton: {
     backgroundColor: '#AF52DE', // Vibrant iOS Purple
   },
-  recolorButton: { // New style for the recolor button
+  recolorButton: { 
     backgroundColor: '#FF9F0A', // Vibrant iOS Orange
   },
+  styleTransferButton: { // New style for the Style Transfer button
+    backgroundColor: '#34C759', // Vibrant iOS Green
+  },
   actionButtonText: {
-    color: '#E5E5EA', // Lighter text color
+    color: '#E5E5EA',
     fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
   },
   cancelButton: {
-    backgroundColor: '#3A3A3C', // A more subtle gray for cancel
+    backgroundColor: '#3A3A3C',
     paddingVertical: 14,
     borderRadius: 14,
     width: '100%',

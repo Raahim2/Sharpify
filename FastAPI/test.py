@@ -1,13 +1,13 @@
 import requests
 
 # Base URL of your FastAPI server
-BASE_URL = "http://localhost:8000/api"
-# BASE_URL = "http://enhance-ai-gamma.vercel.app/api"
+# BASE_URL = "http://localhost:8000/api"
+BASE_URL = "http://enhance-ai-gamma.vercel.app/api"
 
 
 # Path to your testimage
-IMAGE_PATH = "3.png"  # Replace with your image file
 
+IMAGE_PATH = "image.png"
 
 def test_endpoint(endpoint_name, save_as):
     url = BASE_URL + "/" + endpoint_name 
@@ -25,7 +25,7 @@ def test_endpoint(endpoint_name, save_as):
             print(response.text)
 
 if __name__ == "__main__":
-    test_endpoint("canny", "b.png")
+    test_endpoint("thread", "demo/Thread.png")
 
 
 

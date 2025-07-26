@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onRecolorPress }) => {
+const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onStyleTransferPress, onRecolorPress }) => {
   return (
     <View style={styles.bottomNavContainer}>
       <TouchableOpacity style={styles.bottomNavItem} onPress={onEnhancePress}>
@@ -13,6 +13,11 @@ const BottomNavigation = ({ onEnhancePress, onAiFiltersPress, onRecolorPress }) 
       <TouchableOpacity style={styles.bottomNavItem} onPress={onAiFiltersPress}>
         <Icon name="image-auto-adjust" size={28} color="#FFF" />
         <Text style={styles.bottomNavText}>AI Filters</Text>
+      </TouchableOpacity>
+      {/* New Style Transfer Option */}
+      <TouchableOpacity style={styles.bottomNavItem} onPress={onStyleTransferPress}>
+        <Icon name="palette-swatch" size={28} color="#FFF" />
+        <Text style={styles.bottomNavText}>Style Transfer</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.bottomNavItem} onPress={onRecolorPress}>
         <Icon name="format-color-fill" size={28} color="#FFF" />
@@ -34,7 +39,7 @@ const styles = StyleSheet.create({
   },
   bottomNavItem: {
     alignItems: 'center',
-    flex: 1,
+    flex: 1, // This allows the items to space out evenly
   },
   bottomNavText: {
     color: '#AAA',
