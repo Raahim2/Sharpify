@@ -4,6 +4,19 @@
 
 ---
 
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" 
+      alt="Download from Google Play" 
+      height="80">](https://play.google.com/store/apps/details?id=com.raahim2.Sharpify)
+
+
+      
+![Showcase](https://play-lh.googleusercontent.com/YrIfNbDh2EGNp-fxqRye83dQt9TT8dYpSUZr3MamuGPC0IUhy1YFuh8ePiXPP75VMS8=w526-h296-rw)
+![Showcase](https://play-lh.googleusercontent.com/CHerwYkNLcM_1QEwfxDa0W9azueDEIvLq98bdfUS9G-e8SqRdL3xLdfw3DY0ayPpMOc=w526-h296-rw)
+![Showcase](https://play-lh.googleusercontent.com/F1pHPUsstEexQXtcTwHUn2LL0mvae8HfspfDUMcF5P81qrgsabxdCvh5CsT7Gbkwfyg=w526-h296-rw)
+
+
+---
+
 ## ✨ Features
 
 **Core services:**
