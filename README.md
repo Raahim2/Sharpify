@@ -5,14 +5,18 @@
 ---
 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" 
-      alt="Download from Google Play" 
+       alt="Download from Google Play" 
       height="80">](https://play.google.com/store/apps/details?id=com.raahim2.Sharpify)
 
 
-      
+
+![Showcase](https://play-lh.googleusercontent.com/UPqcdAuH3JhEXTZh_2zRp8W2juPiWdYBFo_5QDkMDVpUUrVhyOAxDck4k-f56eFaXAM=w526-h296-rw)
+![Showcase](https://play-lh.googleusercontent.com/8LQT6m1sPnKmj_rJknmTu0UWOFQQ-DxQm9tOGnVRsY8mZauTj4JNTTgF_yKfdq4FGiE=w526-h296-rw)
+![Showcase](https://play-lh.googleusercontent.com/H-feoxzQe4GTXES8cH4g31qRru2kaL70NKe0jSmRcfAkHv_OVaAPSQkaMyqW5vR6_V8=w526-h296-rw)
 ![Showcase](https://play-lh.googleusercontent.com/YrIfNbDh2EGNp-fxqRye83dQt9TT8dYpSUZr3MamuGPC0IUhy1YFuh8ePiXPP75VMS8=w526-h296-rw)
 ![Showcase](https://play-lh.googleusercontent.com/CHerwYkNLcM_1QEwfxDa0W9azueDEIvLq98bdfUS9G-e8SqRdL3xLdfw3DY0ayPpMOc=w526-h296-rw)
 ![Showcase](https://play-lh.googleusercontent.com/F1pHPUsstEexQXtcTwHUn2LL0mvae8HfspfDUMcF5P81qrgsabxdCvh5CsT7Gbkwfyg=w526-h296-rw)
+
 
 
 ---
